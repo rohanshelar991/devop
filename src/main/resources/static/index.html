@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps To-Do List</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-decor"></div>
+    <div class="container">
+        <header>
+            <div class="badge">DevOps Mini Project</div>
+            <h1>To-Do List</h1>
+            <p class="subtitle">Automated CI/CD • Docker Deployment • Prometheus & Grafana</p>
+        </header>
+
+        <!-- Task Input Form -->
+        <div class="card input-card">
+            <form id="task-form" onsubmit="addTask(event)">
+                <div class="input-group">
+                    <input type="text" id="task-title" placeholder="Enter task..." required autocomplete="off">
+                    <button type="submit" id="add-btn">
+                        <span>Add Task</span>
+                    </button>
+                </div>
+            </form>
+            <div id="error-message" class="error-banner hidden"></div>
+        </div>
+
+        <!-- Task List Section -->
+        <div class="card list-card">
+            <div class="list-header">
+                <h2>Your Tasks</h2>
+                <span id="task-count" class="task-counter">0 tasks</span>
+            </div>
+            <ul id="task-list" class="task-list">
+                <!-- Dynamic tasks populated by script.js -->
+            </ul>
+            <div id="empty-state" class="empty-state">
+                <p>No tasks yet. Add one above to get started!</p>
+            </div>
+        </div>
+
+        <!-- System Status Bar -->
+        <footer>
+            <div class="status-indicator">
+                <span class="dot pulse"></span>
+                <span>Backend Connected: <strong>Spring Boot 3.x</strong></span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

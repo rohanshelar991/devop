@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # -------------------------------------------------------
+  # 1. MySQL Database Service
+  # -------------------------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: todo-mysql-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-todo_db}
+      MYSQL_USER: ${MYSQL_USER:-todo_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Rohan@1234}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Rohan@1234}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # -------------------------------------------------------
+  # 2. Spring Boot Application Service
+  # -------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: todo-springboot-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-todo_db}
+      DB_USERNAME: ${MYSQL_USER:-todo_user}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-Rohan@1234}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # -------------------------------------------------------
+  # 3. Prometheus Monitoring Service
+  # -------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: todo-prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  # -------------------------------------------------------
+  # 4. Grafana Visual Dashboard Service
+  # -------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: todo-grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus
+
+volumes:
+  mysql_data:
