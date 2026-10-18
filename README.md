@@ -1,181 +1,179 @@
-# DevOps-Based To-Do List Application with Automated CI/CD, Docker Deployment & Monitoring
+# DevOps-Based To-Do List Application
 
-A complete, beginner-friendly college DevOps mini-project showcasing an automated end-to-end software development lifecycle (SDLC) pipeline.
-
----
-
-## 📌 Project Overview
-
-This project demonstrates how a simple **Spring Boot REST API** and **Web Frontend** are integrated into a modern DevOps ecosystem. Rather than focusing on complex business logic, the project emphasizes automation, containerization, continuous integration, and real-time application monitoring.
-
-### Core Features
-1. **Add Task**: Create new To-Do items.
-2. **View Tasks**: Display all tasks retrieved from MySQL database.
-3. **Complete Task**: Toggle task completion status.
-4. **Delete Task**: Remove tasks from database.
-
----
-
-## 🛠️ Technology Stack
-
-* **Backend**: Java 17, Spring Boot 3.3.x, Spring Web, Spring Data JPA
-* **Frontend**: HTML5, CSS3, JavaScript (Fetch API)
-* **Database**: MySQL 8.0 / H2 In-Memory (for testing)
-* **Build Tool**: Apache Maven
-* **Version Control**: Git & GitHub
-* **CI/CD Pipeline**: GitHub Actions
-* **Containerization**: Docker & Docker Compose
-* **Monitoring & Metrics**: Spring Boot Actuator, Prometheus, Grafana
-
----
-
-## 📐 Architecture & DevOps Workflow
+A small college-level project that demonstrates a complete DevOps workflow:
 
 ```text
-                  Developer
-                      │ (git push)
-                      ▼
-                   GitHub
-                      │ (webhook trigger)
-                      ▼
-               GitHub Actions CI
-           ┌──────────┴──────────┐
-           ▼                     ▼
-     Build App (Maven)    Run Tests (JUnit 5)
+Developer -> GitHub -> GitHub Actions -> Maven build and tests
+          -> Docker Compose -> Spring Boot + MySQL
+          -> Prometheus -> Grafana
 ```
+
+The application is intentionally simple. Users can add tasks, view tasks, mark
+tasks as completed, and delete tasks. Tasks are stored in MySQL.
+
+## Features
+
+- Add a task
+- View all tasks
+- Mark a task as completed
+- Delete a task
+
+## Technology Stack
+
+- Java 25 and Spring Boot 3.3
+- Maven, Spring Web, Spring Data JPA
+- MySQL 8
+- HTML, CSS, and JavaScript Fetch API
+- JUnit 5 and Mockito
+- Git, GitHub, and GitHub Actions
+- Docker, Docker Compose, Prometheus, and Grafana
+
+## Project Structure
 
 ```text
-                           Docker Compose Stack
-                                    │
-           ┌────────────────────────┼────────────────────────┐
-           ▼                        ▼                        ▼
-    Spring Boot App           MySQL Database             Prometheus
-  (http://localhost:8080)   (http://localhost:3306)    (http://localhost:9090)
-           │                                                 │
-           └─────────────────────────────────────────────────┼──────────┐
-                                                             ▼          ▼
-                                                          Grafana   Actuator
-                                                   (http://localhost:3000)
+src/main/java/com/rohan/todo/
+  controller/       REST endpoints
+  model/            Task JPA entity
+  repository/       Spring Data repository
+  service/          Task business logic
+src/main/resources/static/
+  index.html        web page
+  style.css         page styles
+  script.js         API calls and rendering
+.github/workflows/ci.yml
+docker-compose.yml
+prometheus.yml
+grafana/provisioning/
 ```
 
----
+## Prerequisites
 
-## 🚀 Prerequisites
+- JDK 25
+- Maven 3.8 or newer
+- Git
+- Docker Desktop with Docker Compose
+- A GitHub account for the CI workflow
 
-Ensure you have the following installed on your machine:
-* **Java Development Kit (JDK 17 or 21)**
-* **Apache Maven 3.8+**
-* **Git**
-* **Docker & Docker Compose** (or Docker Desktop)
-* **MySQL Server** (if running locally without Docker)
+## Run Locally With MySQL
 
----
+Create a database and user in MySQL, then export the connection variables. The
+application does not contain a real password.
 
-## 🏃 Method 1: Running Locally (Without Docker)
-
-### 1. Database Setup
-Ensure MySQL is running on your machine with database name `todo_db` or allow Spring Boot to auto-create it:
-```sql
-CREATE DATABASE IF NOT EXISTS todo_db;
-```
-
-### 2. Configure Environment Variables
-You can pass environment variables or use the default values configured in `application.properties`:
-* `DB_HOST`: `localhost`
-* `DB_PORT`: `3306`
-* `DB_NAME`: `todo_db`
-* `DB_USERNAME`: `root`
-* `DB_PASSWORD`: `Rohan@1234`
-
-### 3. Run Application
-Run the Spring Boot application using Maven:
 ```bash
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_NAME=todo_db
+export DB_USERNAME=todo_user
+export DB_PASSWORD=your_password
 mvn spring-boot:run
 ```
 
-Access the application in your browser:
-👉 **http://localhost:8080**
+Open <http://localhost:8080>.
 
----
+## Run the Complete Stack With Docker Compose
 
-## 🐳 Method 2: Running With Docker Compose (Recommended)
-
-To launch the complete DevOps stack (Spring Boot + MySQL + Prometheus + Grafana) in containers with a single command:
+Copy the example environment file and change the example passwords:
 
 ```bash
+cp .env.example .env
 docker compose up --build -d
-```
-
-### Check Running Containers
-```bash
 docker compose ps
 ```
 
-### Stop All Services
+Compose starts the Spring Boot application, MySQL, Prometheus, and Grafana.
+MySQL is marked healthy before the application starts. Stop the stack with:
+
 ```bash
 docker compose down
 ```
 
----
+To stop it and remove the stored MySQL volume, use `docker compose down -v`.
+This deletes local database data, so use it only when that is intended.
 
-## 📊 Monitoring & Service URLs
+## URLs
 
-| Service / Endpoint | Description | URL |
-| :--- | :--- | :--- |
-| **Application UI** | To-Do Web Frontend | [http://localhost:8080](http://localhost:8080) |
-| **REST API** | Task API Endpoint | [http://localhost:8080/api/tasks](http://localhost:8080/api/tasks) |
-| **Actuator Health** | Application Health Check | [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health) |
-| **Prometheus Metrics**| Metrics Scrape Target | [http://localhost:8080/actuator/prometheus](http://localhost:8080/actuator/prometheus) |
-| **Prometheus Web UI** | Metrics Monitoring Console | [http://localhost:9090](http://localhost:9090) |
-| **Grafana Dashboard** | Visual Dashboard UI | [http://localhost:3000](http://localhost:3000) |
+| Service | URL |
+| --- | --- |
+| To-Do application | http://localhost:8080 |
+| REST API | http://localhost:8080/api/tasks |
+| Health check | http://localhost:8080/actuator/health |
+| Prometheus metrics | http://localhost:8080/actuator/prometheus |
+| Prometheus UI | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
 
-*Default Grafana Credentials: Username `admin` / Password `admin`*
+Grafana is provisioned with the Prometheus data source and a dashboard named
+`To-Do Application Overview`. The default local login is `admin` / `admin`.
 
----
+## REST API
 
-## 🧪 Running Unit & Integration Tests
-
-Execute all backend unit tests using Maven:
-```bash
-mvn test
+```text
+GET    /api/tasks       list all tasks
+POST   /api/tasks       create a task, for example {"title":"Learn Docker"}
+PUT    /api/tasks/{id}  mark a task complete
+DELETE /api/tasks/{id}  delete a task
 ```
-*Note: Tests run using an in-memory H2 database, requiring no active MySQL server.*
 
----
+## Tests and Packaging
 
-## 🔄 GitHub Actions CI/CD Pipeline
+Run the unit and controller tests without starting MySQL:
 
-The `.github/workflows/ci.yml` pipeline automatically triggers whenever changes are pushed to GitHub:
+```bash
+mvn clean test
+```
 
-1. **Checkout Code**: Fetches source code from repository.
-2. **Setup JDK 17**: Configures Java environment.
-3. **Build & Test**: Runs `mvn clean test` to ensure zero regressions.
-4. **Package JAR**: Builds the production JAR executable.
+Build the executable JAR:
 
-### Git Push Instructions
-To push this codebase to your GitHub repository:
+```bash
+mvn clean package
+java -jar target/todo-devops-1.0.0.jar
+```
+
+Build and run only the application image:
+
+```bash
+docker build -t todo-app .
+docker run --rm -p 8080:8080 \
+  -e DB_HOST=host.docker.internal \
+  -e DB_PORT=3306 \
+  -e DB_NAME=todo_db \
+  -e DB_USERNAME=todo_user \
+  -e DB_PASSWORD=your_password \
+  todo-app
+```
+
+## GitHub Actions
+
+The workflow in `.github/workflows/ci.yml` runs on pushes and pull requests to
+`main` or `master`. It checks out the code, installs Java 25, runs
+`mvn clean test`, and packages the JAR. The job fails when a test or build
+fails. It does not require Docker Hub credentials.
+
+Example Git workflow:
 
 ```bash
 git init
 git add .
-git commit -m "Initial commit: DevOps To-Do List Application with Docker, CI/CD and Monitoring"
+git commit -m "Initial project setup"
 git branch -M main
-git remote add origin https://github.com/rohanshelar991/devop.git
+git remote add origin <GITHUB_REPOSITORY_URL>
 git push -u origin main
 ```
 
----
+Useful follow-up commits include `Add REST APIs`, `Add frontend`, `Add unit
+tests`, `Add Docker configuration`, `Add GitHub Actions CI`, and
+`Add Prometheus monitoring`.
 
-## ❓ Troubleshooting & FAQs
+## Troubleshooting
 
-### 1. MySQL Connection Failed
-* **Symptom**: `Communications link failure` or `Access denied for user`
-* **Fix**: Verify MySQL server is running. Check username and password in `application.properties` or environment variables (`DB_USERNAME` and `DB_PASSWORD`).
+- **MySQL connection failure:** confirm MySQL is healthy, then check `DB_*`
+  values. With Compose, confirm `.env` exists and matches the `MYSQL_*` values.
+- **Port already in use:** stop the process using 8080, 3306, 9090, or 3000,
+  or change the host-side port in `docker-compose.yml`.
+- **Docker is not running:** start Docker Desktop and retry the Compose command.
+- **Maven build failure:** check that Java 25 is active with `java -version`,
+  then retry `mvn clean test`.
+- **Prometheus target is down:** open `/actuator/prometheus` in the browser and
+  check `http://localhost:9090/targets`. Inside Compose the target is `app:8080`.
 
-### 2. Port Already in Use (8080, 3306, 9090, 3000)
-* **Symptom**: `Port 8080 is already in use`
-* **Fix**: Stop any existing process occupying the port or change port mappings in `docker-compose.yml`.
-
-### 3. Prometheus Cannot Scrape Spring Boot
-* **Symptom**: Target state is `DOWN` in Prometheus UI (`http://localhost:9090/targets`)
-* **Fix**: Ensure Spring Boot application is healthy at `http://localhost:8080/actuator/prometheus`. In Docker Compose, ensure the host name `app` matches the service name.
+Never commit `.env`, passwords, API keys, `target/`, or IDE files. The included
+`.gitignore` protects the common local files.

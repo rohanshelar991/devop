@@ -3,57 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevOps To-Do List</title>
+    <meta name="theme-color" content="#101313">
+    <title>To-Do | DevOps Mini Project</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="background-decor"></div>
-    <div class="container">
-        <header>
-            <div class="badge">DevOps Mini Project</div>
-            <h1>To-Do List</h1>
-            <p class="subtitle">Automated CI/CD • Docker Deployment • Prometheus & Grafana</p>
+    <main class="app-shell">
+        <header class="app-header">
+            <div class="brand-lockup">
+                <span class="brand-mark" aria-hidden="true">+</span>
+                <div>
+                    <p class="eyebrow">DevOps mini project</p>
+                    <h1>Today, made lighter.</h1>
+                </div>
+            </div>
+            <div id="connection-pill" class="connection-pill" aria-label="Backend status">
+                <span class="status-dot pulse"></span>
+                <span id="connection-label">Live</span>
+            </div>
         </header>
 
-        <!-- Task Input Form -->
-        <div class="card input-card">
+        <section class="overview" aria-labelledby="overview-title">
+            <div>
+                <p class="eyebrow">Your workspace</p>
+                <h2 id="overview-title">A little progress goes a long way.</h2>
+            </div>
+            <div class="progress-ring" aria-label="Task completion progress">
+                <svg viewBox="0 0 42 42" aria-hidden="true">
+                    <circle class="ring-track" cx="21" cy="21" r="16"></circle>
+                    <circle id="progress-ring" class="ring-value" cx="21" cy="21" r="16"></circle>
+                </svg>
+                <strong id="progress-value">0%</strong>
+            </div>
+            <div class="overview-stats">
+                <div>
+                    <span id="task-count">0</span>
+                    <small>Total tasks</small>
+                </div>
+                <div>
+                    <span id="completed-count">0</span>
+                    <small>Completed</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="composer-panel" aria-label="Add a task">
             <form id="task-form" onsubmit="addTask(event)">
-                <div class="input-group">
-                    <input type="text" id="task-title" placeholder="Enter task..." required autocomplete="off">
-                    <button type="submit" id="add-btn">
-                        <span>Add Task</span>
-                    </button>
+                <label for="task-title">What needs doing?</label>
+                <div class="input-row">
+                    <input type="text" id="task-title" placeholder="e.g. Ship the next release" required autocomplete="off" maxlength="255">
+                    <button type="submit" id="add-btn"><span>Add task</span><span class="button-arrow" aria-hidden="true">&rarr;</span></button>
                 </div>
             </form>
-            <div id="error-message" class="error-banner hidden"></div>
-        </div>
+            <div id="error-message" class="error-banner hidden" role="alert"></div>
+        </section>
 
-        <!-- Task List Section -->
-        <div class="card list-card">
+        <section class="tasks-panel" aria-labelledby="tasks-title">
             <div class="list-header">
-                <h2>Your Tasks</h2>
-                <span id="task-count" class="task-counter">0 tasks</span>
+                <div>
+                    <p class="eyebrow">Your list</p>
+                    <h2 id="tasks-title">Open loops</h2>
+                </div>
+                <div class="list-meta">
+                    <span id="task-label" class="task-counter">0 tasks</span>
+                    <button id="clear-completed" class="clear-button" type="button" onclick="clearCompleted()">Clear done</button>
+                </div>
             </div>
-            <ul id="task-list" class="task-list">
-                <!-- Dynamic tasks populated by script.js -->
-            </ul>
+            <div class="task-tools">
+                <label class="search-box" for="task-search">
+                    <span aria-hidden="true">/</span>
+                    <input id="task-search" type="search" placeholder="Search tasks" autocomplete="off">
+                </label>
+                <div class="filter-tabs" role="group" aria-label="Filter tasks">
+                    <button class="filter-tab active" data-filter="all" type="button">All</button>
+                    <button class="filter-tab" data-filter="active" type="button">Active</button>
+                    <button class="filter-tab" data-filter="completed" type="button">Done</button>
+                </div>
+            </div>
+            <ul id="task-list" class="task-list"></ul>
             <div id="empty-state" class="empty-state">
-                <p>No tasks yet. Add one above to get started!</p>
+                <span class="empty-icon" aria-hidden="true">&check;</span>
+                <p>Nothing here yet.</p>
+                <small>Add your first task above and make it real.</small>
             </div>
-        </div>
+        </section>
 
-        <!-- System Status Bar -->
         <footer>
-            <div class="status-indicator">
-                <span class="dot pulse"></span>
-                <span>Backend Connected: <strong>Spring Boot 3.x</strong></span>
-            </div>
+            <span class="footer-line"></span>
+            <span>Spring Boot &middot; MySQL &middot; Docker</span>
+            <span class="footer-line"></span>
         </footer>
-    </div>
-
+    </main>
     <script src="script.js"></script>
 </body>
 </html>

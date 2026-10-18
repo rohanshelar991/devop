@@ -1,7 +1,21 @@
 const API_URL = '/api/tasks';
+let allTasks = [];
+let activeFilter = 'all';
+let searchTerm = '';
 
 // Execute when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('task-search').addEventListener('input', event => {
+        searchTerm = event.target.value.trim().toLowerCase();
+        renderTasks(allTasks);
+    });
+    document.querySelectorAll('.filter-tab').forEach(button => {
+        button.addEventListener('click', () => {
+            activeFilter = button.dataset.filter;
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.toggle('active', tab === button));
+            renderTasks(allTasks);
+        });
+    });
     fetchTasks();
 });
 
@@ -14,8 +28,11 @@ async function fetchTasks() {
             throw new Error(`Failed to fetch tasks: ${response.status} ${response.statusText}`);
         }
         const tasks = await response.json();
+        allTasks = tasks;
         renderTasks(tasks);
+        setConnectionStatus(true);
     } catch (error) {
+        setConnectionStatus(false);
         showError('Unable to load tasks from server. Ensure Spring Boot backend is running.');
         console.error('Error fetching tasks:', error);
     }
@@ -26,20 +43,41 @@ function renderTasks(tasks) {
     const taskList = document.getElementById('task-list');
     const emptyState = document.getElementById('empty-state');
     const taskCounter = document.getElementById('task-count');
+    const taskLabel = document.getElementById('task-label');
+    const completedCount = document.getElementById('completed-count');
+    const progressValue = document.getElementById('progress-value');
+    const progressRing = document.getElementById('progress-ring');
 
+    const visibleTasks = tasks.filter(task => {
+        const matchesFilter = activeFilter === 'all'
+            || (activeFilter === 'active' && !task.completed)
+            || (activeFilter === 'completed' && task.completed);
+        return matchesFilter && (!searchTerm || task.title.toLowerCase().includes(searchTerm));
+    });
     taskList.innerHTML = '';
-    taskCounter.textContent = `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}`;
+    const completed = tasks.filter(task => task.completed).length;
+    const progress = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
+    taskCounter.textContent = tasks.length;
+    taskLabel.textContent = `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}`;
+    completedCount.textContent = completed;
+    progressValue.textContent = `${progress}%`;
+    progressRing.style.strokeDashoffset = 100.53 - (100.53 * progress / 100);
 
-    if (tasks.length === 0) {
+    document.getElementById('clear-completed').disabled = completed === 0;
+
+    if (visibleTasks.length === 0) {
         emptyState.classList.remove('hidden');
+        emptyState.querySelector('p').textContent = tasks.length === 0 ? 'Nothing here yet.' : 'No matching tasks.';
+        emptyState.querySelector('small').textContent = tasks.length === 0 ? 'Add your first task above and make it real.' : 'Try another filter or search term.';
         return;
     }
 
     emptyState.classList.add('hidden');
 
-    tasks.forEach(task => {
+    visibleTasks.forEach((task, index) => {
         const li = document.createElement('li');
         li.className = `task-item ${task.completed ? 'completed' : ''}`;
+        li.style.animationDelay = `${Math.min(index * 45, 225)}ms`;
 
         li.innerHTML = `
             <div class="task-info">
@@ -54,6 +92,19 @@ function renderTasks(tasks) {
 
         taskList.appendChild(li);
     });
+}
+
+async function clearCompleted() {
+    const completedTasks = allTasks.filter(task => task.completed);
+    if (!completedTasks.length) return;
+    try {
+        hideError();
+        await Promise.all(completedTasks.map(task => fetch(`${API_URL}/${task.id}`, { method: 'DELETE' })));
+        await fetchTasks();
+    } catch (error) {
+        showError('Failed to clear completed tasks. Please try again.');
+        console.error('Error clearing completed tasks:', error);
+    }
 }
 
 // Add a new task
@@ -79,7 +130,8 @@ async function addTask(event) {
         }
 
         input.value = '';
-        fetchTasks();
+        await fetchTasks();
+        input.focus();
     } catch (error) {
         showError('Failed to add task. Please try again.');
         console.error('Error adding task:', error);
@@ -98,7 +150,7 @@ async function completeTask(id) {
             throw new Error(`Failed to complete task: ${response.status}`);
         }
 
-        fetchTasks();
+        await fetchTasks();
     } catch (error) {
         showError('Failed to mark task as completed.');
         console.error('Error completing task:', error);
@@ -117,7 +169,7 @@ async function deleteTask(id) {
             throw new Error(`Failed to delete task: ${response.status}`);
         }
 
-        fetchTasks();
+        await fetchTasks();
     } catch (error) {
         showError('Failed to delete task.');
         console.error('Error deleting task:', error);
@@ -135,6 +187,13 @@ function showError(message) {
 function hideError() {
     const errorElement = document.getElementById('error-message');
     errorElement.classList.add('hidden');
+}
+
+function setConnectionStatus(connected) {
+    const pill = document.getElementById('connection-pill');
+    const label = document.getElementById('connection-label');
+    pill.classList.toggle('offline', !connected);
+    label.textContent = connected ? 'Live' : 'Offline';
 }
 
 // Utility: Escape HTML characters to prevent XSS

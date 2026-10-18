@@ -1,20 +1,19 @@
-# Target build directory
+# Maven
 target/
 
-# Environment file with secrets
+# Local environment and secrets
 .env
+*.env.local
 
-# IDE and Editor files
+# IDE files
 .idea/
-*.iml
 .vscode/
+*.iml
 .classpath
 .project
 .settings/
 
-# Log files
+# Logs and OS files
 *.log
-
-# OS generated files
 .DS_Store
 Thumbs.db
